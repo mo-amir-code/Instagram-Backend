@@ -7,8 +7,18 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
+const uploadVideoOptions = {
+  stream:true,
+  resource_type: "video",
+};
+const uploadImageOptions = {
+  stream:true,
+  resource_type: "image",
+};
+
 exports.uploadImageOnCloudinary = (file, type) => {
   return new Promise(async (resolved, rejected) => {
+    console.log(file, type);
     try {
       if (type !== "videos") {
         cloudinary.uploader
@@ -21,30 +31,55 @@ exports.uploadImageOnCloudinary = (file, type) => {
             rejected(err);
           });
       } else {
-        cloudinary.uploader
-          .upload(file, {
-            folder: type,
-            resource_type: 'video',
-            transformation: [
-              { start_offset: "7.0" },
-              {
-                aspect_ratio: "9:16",
-                gravity: "auto",
-                height: 500,
-                crop: "fill_pad",
-              },
-            ],
-          })
-          .then((result) => {
-            resolved(result.url);
-          })
-          .catch((err) => {
-            console.log(err);
-            rejected(err);
-          });
+        cloudinary.uploader.upload_stream(
+          { folder: 'videos', ...uploadOptions, },
+          (error, result) => {
+            if (error) {
+              console.error(error);
+              rejected(error.message);
+            } else {
+              resolved(result.url);
+            }
+          }
+        ).end(file);
       }
     } catch (err) {
-      console.log(err.message)
+      console.log(err.message);
+    }
+  });
+};
+
+exports.uploadOnCloudinaryForChat = (file, type) => {
+  return new Promise(async (resolved, rejected) => {
+    // console.log(file, type);
+    try {
+      if (type !== "videos") {
+        cloudinary.uploader.upload_stream(
+          { folder: 'images', ...uploadImageOptions, },
+          (error, result) => {
+            if (error) {
+              console.error(error);
+              rejected(error.message);
+            } else {
+              resolved(result.url);
+            }
+          }
+        ).end(file);
+      } else {
+        cloudinary.uploader.upload_stream(
+          { folder: 'videos', ...uploadVideoOptions, },
+          (error, result) => {
+            if (error) {
+              console.error(error);
+              rejected(error.message);
+            } else {
+              resolved(result.url);
+            }
+          }
+        ).end(file);
+      }
+    } catch (err) {
+      console.log(err.message);
     }
   });
 };

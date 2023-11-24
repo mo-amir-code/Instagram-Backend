@@ -20,7 +20,7 @@ const userSchema = new Schema(
     token: { type: String },
     passwordResetToken: { type: String },
     socketId: { type: String },
-    status: { type: String },
+    status: { type: String, enum:["online", "offline"] },
   },
   {
     timestamps: true,
