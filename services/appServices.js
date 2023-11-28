@@ -1,3 +1,7 @@
+const Notification = require("../models/Notification");
+const { uploadImageOnCloudinary } = require("./UploadCloudinary");
+const { takeScreenshot } = require("./puppeteer");
+
 exports.arrangePosts = (posts) => {
   // console.
   const newPosts = [];
@@ -44,4 +48,23 @@ exports.checkIncoming = (loggedInUserId, fromUserId) => {
   } else {
     return true;
   }
+};
+
+exports.createNotification = async (data, file) => {
+  if (data.contentType === "reel") {
+    const urlBuffer = await takeScreenshot(file);
+    const videoScreenShotUrl = await uploadImageOnCloudinary(
+      urlBuffer,
+      "screenshots"
+    );
+    data.thumbnail = videoScreenShotUrl;
+  }
+
+  await new Notification(data).save();
+};
+
+exports.markAsSeen = async (notifications) => {
+  notifications.forEach(async (ntf) => {
+    await Notification.findByIdAndUpdate(ntf.id, { seen: true });
+  });
 };

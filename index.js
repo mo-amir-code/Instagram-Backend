@@ -73,7 +73,14 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("send-new-message", async (data) => {
-    const { message, type, toUserId, fromUserId, conversationId } = data;
+    const {
+      message,
+      type,
+      toUserId,
+      fromUserId,
+      conversationId,
+      loggedInUserId,
+    } = data;
     const fromUser = await User.findById(fromUserId).select(
       "socketId name username avatar"
     );
@@ -127,12 +134,14 @@ io.on("connection", async (socket) => {
         message: newReadyMessage,
         conversationId,
         user: toUser,
+        loggedInUserId,
       });
       newReadyMessage.incoming = !newReadyMessage.incoming;
       io.to(toUser.socketId).emit("recieved-new-message", {
         message: newReadyMessage,
         conversationId,
         user: fromUser,
+        loggedInUserId,
       });
     } catch (err) {
       io.to(fromUser.socketId).emit("error", {
@@ -143,6 +152,7 @@ io.on("connection", async (socket) => {
 
   socket.on("mark-message-as-read", async ({ convId, msgId }) => {
     // console.log(convId, msgId);
+    console.log("mark as read");
     await DuoChat.findByIdAndUpdate(
       convId,
       { $set: { "conversation.$[element].read": true } },
@@ -210,6 +220,12 @@ io.on("connection", async (socket) => {
       });
     }
   );
+
+  socket.on("send-notification", async ({ type, userId }) => {
+    // console.log(userId, type);
+    const user = await User.findById(userId).select("socketId");
+    io.to(user.socketId).emit("new-notification", { type });
+  });
 
   // socket.on("disconnect", async (userId) => {
   //   await User.findByIdAndUpdate(userId, { status: "offline" });

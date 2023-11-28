@@ -27,10 +27,10 @@ exports.updateMyUser = async (req, res) => {
   try {
     const { avatar, id } = req.body;
 
-    if(avatar){
+    if (avatar) {
       const url = await uploadImageOnCloudinary(avatar, "images");
       req.body.avatar = url;
-    }else{
+    } else {
       delete req.body.avatar;
     }
 
@@ -38,13 +38,11 @@ exports.updateMyUser = async (req, res) => {
       new: true,
     }).select("id name username email avatar followers following bio category");
 
-    res
-      .status(200)
-      .json({
-        status: "success",
-        message: "User updated successfully!",
-        data: user,
-      });
+    res.status(200).json({
+      status: "success",
+      message: "User updated successfully!",
+      data: user,
+    });
   } catch (err) {
     console.log(err.message);
     res
@@ -56,16 +54,30 @@ exports.updateMyUser = async (req, res) => {
 exports.fetchUser = async (req, res) => {
   try {
     const { username } = req.query;
-    const user = await User.findOne({username:username}).select(
+    const user = await User.findOne({ username: username }).select(
       "id name username email avatar followers following bio category"
     );
     const posts = await Post.countDocuments({ user: user.id });
     const data = structuredData(user, posts);
 
-
     res
       .status(200)
       .json({ status: "success", message: "User fetched successfully!", data });
+  } catch (err) {
+    console.log(err.message);
+    res
+      .status(500)
+      .json({ status: "error", message: "Some Internal Error Occured!" });
+  }
+};
+
+exports.fetchFeatureUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("name username avatar");
+
+    res
+      .status(200)
+      .json({ status: "success", message: "User fetched successfully!", data:users });
   } catch (err) {
     console.log(err.message);
     res

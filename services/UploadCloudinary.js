@@ -8,12 +8,12 @@ cloudinary.config({
 });
 
 const uploadVideoOptions = {
-  stream:true,
+  stream: true,
   resource_type: "video",
 };
 const uploadImageOptions = {
-  stream:true,
-  resource_type: "image",
+  stream: true,
+  resource_type: "auto",
 };
 
 exports.uploadImageOnCloudinary = (file, type) => {
@@ -22,26 +22,32 @@ exports.uploadImageOnCloudinary = (file, type) => {
     try {
       if (type !== "videos") {
         cloudinary.uploader
-          .upload(file, { folder: type })
-          .then((result) => {
-            resolved(result.url);
-          })
-          .catch((err) => {
-            console.log(err);
-            rejected(err);
-          });
-      } else {
-        cloudinary.uploader.upload_stream(
-          { folder: 'videos', ...uploadOptions, },
-          (error, result) => {
-            if (error) {
-              console.error(error);
-              rejected(error.message);
-            } else {
-              resolved(result.url);
+          .upload_stream(
+            { folder: type, ...uploadImageOptions },
+            (error, result) => {
+              if (error) {
+                console.error(error);
+                rejected(error.message);
+              } else {
+                resolved(result.url);
+              }
             }
-          }
-        ).end(file);
+          )
+          .end(file);
+      } else {
+        cloudinary.uploader
+          .upload_stream(
+            { folder: "videos", ...uploadVideoOptions },
+            (error, result) => {
+              if (error) {
+                console.error(error);
+                rejected(error.message);
+              } else {
+                resolved(result.url);
+              }
+            }
+          )
+          .end(file);
       }
     } catch (err) {
       console.log(err.message);
@@ -54,29 +60,33 @@ exports.uploadOnCloudinaryForChat = (file, type) => {
     // console.log(file, type);
     try {
       if (type !== "videos") {
-        cloudinary.uploader.upload_stream(
-          { folder: 'images', ...uploadImageOptions, },
-          (error, result) => {
-            if (error) {
-              console.error(error);
-              rejected(error.message);
-            } else {
-              resolved(result.url);
+        cloudinary.uploader
+          .upload_stream(
+            { folder: "images", ...uploadImageOptions },
+            (error, result) => {
+              if (error) {
+                console.error(error);
+                rejected(error.message);
+              } else {
+                resolved(result.url);
+              }
             }
-          }
-        ).end(file);
+          )
+          .end(file);
       } else {
-        cloudinary.uploader.upload_stream(
-          { folder: 'videos', ...uploadVideoOptions, },
-          (error, result) => {
-            if (error) {
-              console.error(error);
-              rejected(error.message);
-            } else {
-              resolved(result.url);
+        cloudinary.uploader
+          .upload_stream(
+            { folder: "videos", ...uploadVideoOptions },
+            (error, result) => {
+              if (error) {
+                console.error(error);
+                rejected(error.message);
+              } else {
+                resolved(result.url);
+              }
             }
-          }
-        ).end(file);
+          )
+          .end(file);
       }
     } catch (err) {
       console.log(err.message);

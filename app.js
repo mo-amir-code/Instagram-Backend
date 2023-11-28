@@ -11,7 +11,6 @@ app.use(express.urlencoded({limit: "25mb", extended: true}));
 
 app.use(router);
 
-
 connectToDB().catch((err)=>{
     console.log(err.message, "Database connection error");
 })

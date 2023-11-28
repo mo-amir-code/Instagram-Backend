@@ -13,7 +13,7 @@ const userSchema = new Schema(
     gender: { type: String, enum: ["MALE", "FEMALE", "TRANSGENDER"] },
     followers: [{ type: String, ref: "User" }],
     following: [{ type: String, ref: "User" }],
-    saved: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    saved: [{ type: Schema.Types.ObjectId, ref: "Post" || "Reel" }],
     verified: { type: Boolean, default: false },
     otp: { type: String },
     otpExpiryTime: { type: Date },

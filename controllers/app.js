@@ -3,10 +3,14 @@ const Post = require("../models/Post");
 const Comment = require("../models/Comment");
 const User = require("../models/User");
 const Reel = require("../models/Reel");
+const Notification = require("../models/Notification");
+
 const {
-  arrangePosts,
   sortAccordingUpload,
+  createNotification,
+  markAsSeen,
 } = require("../services/appServices");
+const { takeScreenshot } = require("../services/puppeteer");
 
 exports.createPost = async (req, res) => {
   try {
@@ -59,12 +63,41 @@ exports.createVideoPost = async (req, res) => {
 exports.fetchMyUserPosts = async (req, res) => {
   try {
     const { id } = req.query;
+
     let posts = await Post.find({ user: id })
       .select("description file user likes comments createdAt")
       .populate("comments");
+
     let reels = await Reel.find({ user: id })
       .select("description file user likes comments createdAt")
       .populate("comments");
+
+    const savedPosts = await Post.find({ saved: id })
+      .select("description file user likes comments createdAt")
+      .populate("comments");
+    const modifiedSavedPosts = savedPosts.map((post) => {
+      const newPost = { ...post.toObject() };
+      newPost.comments = post.comments.comments.length;
+      newPost["type"] = "post";
+      return newPost;
+    });
+    const savedReels = await Reel.find({ saved: id })
+      .select("description file user likes comments createdAt")
+      .populate("comments");
+    const modifiedSavedReels = savedReels.map((reel) => {
+      const newPost = { ...reel.toObject() };
+      newPost.comments = reel.comments.comments.length;
+      newPost["type"] = "reel";
+      return newPost;
+    });
+
+    const readySaved = modifiedSavedPosts;
+    modifiedSavedReels.forEach((reel) => {
+      const randomNumber = Math.round(
+        Math.random() * modifiedSavedPosts.length
+      );
+      readySaved.splice(randomNumber, 0, reel);
+    });
 
     const modifiedPosts = posts.map((post) => {
       const newPost = { ...post.toObject() };
@@ -86,6 +119,7 @@ exports.fetchMyUserPosts = async (req, res) => {
       status: "success",
       message: "Your posts have been founded",
       data: readyPosts,
+      saved: readySaved,
     });
   } catch (err) {
     console.log(err.message);
@@ -192,16 +226,47 @@ exports.fetchPosts = async (req, res) => {
 exports.likePost = async (req, res) => {
   try {
     const { postId, userId, type } = req.body;
+    let post;
+    let reel;
     if (type === "post") {
-      await Post.findByIdAndUpdate(postId, { $push: { likes: userId } });
+      post = await Post.findByIdAndUpdate(postId, {
+        $push: { likes: userId },
+      }).select("file user");
     } else {
-      await Reel.findByIdAndUpdate(postId, { $push: { likes: userId } });
+      reel = await Reel.findByIdAndUpdate(postId, {
+        $push: { likes: userId },
+      }).select("file user");
+    }
+
+    let videoScreenShotUrl;
+    const notificationData = {
+      thumbnail: null,
+      type: "like",
+      contentType: null,
+      message: "",
+      user: userId,
+      postId: null,
+      postUser: null,
+    };
+
+    if (post) {
+      videoScreenShotUrl = post.file;
+      notificationData.thumbnail = videoScreenShotUrl;
+      notificationData.contentType = "post";
+      notificationData.postId = post.id;
+      notificationData.postUser = post.user;
+      createNotification(notificationData);
+    } else {
+      notificationData.contentType = "reel";
+      notificationData.postId = reel.id;
+      notificationData.postUser = reel.user;
+      createNotification(notificationData, reel.file);
     }
 
     res.status(200).json({
       status: "success",
       message: "Post Liked",
-      data: { postId, userId },
+      data: { postId, userId, type },
     });
   } catch (err) {
     console.log(err.message);
@@ -223,7 +288,7 @@ exports.removeLike = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Like removed",
-      data: { postId, userId },
+      data: { postId, userId, type },
     });
   } catch (err) {
     console.log(err.message);
@@ -288,9 +353,15 @@ exports.savePost = async (req, res) => {
 
 exports.removeSavedPost = async (req, res) => {
   try {
-    const { postId, userId } = req.body;
-    await Post.findByIdAndUpdate(postId, { $pull: { saved: userId } });
+    const { postId, userId, type } = req.body;
+    if (type === "post") {
+      await Post.findByIdAndUpdate(postId, { $pull: { saved: userId } });
+    } else {
+      await Reel.findByIdAndUpdate(postId, { $pull: { saved: userId } });
+    }
     await User.findByIdAndUpdate(userId, { $pull: { saved: postId } });
+
+    // console.log(postId, userId);
 
     res.status(200).json({
       status: "success",
@@ -407,13 +478,14 @@ exports.fetchExplore = async (req, res) => {
     }
 
     const posts = await Post.find()
-      .skip(results)
-      .limit(12)
+      .skip(results * 0.7)
+      .limit(8)
       .select("description file likes comments")
       .populate("comments");
+
     const reels = await Reel.find()
-      // .skip()
-      .limit(12)
+      .skip(results * 0.3)
+      .limit(4)
       .select("description file likes comments")
       .populate("comments");
     const modifiedPosts = posts.map((post) => {
@@ -516,6 +588,7 @@ exports.fetchReels = async (req, res) => {
 
     const reels = await Reel.find()
       .skip(results)
+      .limit(3)
       .select("description file user likes comments saved")
       .populate("user", "id name username avatar")
       .populate("comments");
@@ -560,6 +633,59 @@ exports.fetchSeachResults = async (req, res) => {
       status: "success",
       message: "Post Liked",
       data: results,
+    });
+  } catch (err) {
+    console.log(err.message);
+    res
+      .status(500)
+      .json({ status: "error", message: "Some Internal Error Occured!" });
+  }
+};
+
+exports.fetchNotificationsCount = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    // const notifications = await Notification.find({ postUser: userId });
+    const likesCount = await Notification.countDocuments({
+      postUser: userId,
+      type: "like",
+      seen: false,
+    });
+    const commentsCount = await Notification.countDocuments({
+      postUser: userId,
+      type: "comment",
+      seen: false,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Notification count fetched successfully",
+      data: { likesCount, commentsCount },
+    });
+  } catch (err) {
+    console.log(err.message);
+    res
+      .status(500)
+      .json({ status: "error", message: "Some Internal Error Occured!" });
+  }
+};
+
+exports.fetchNotifications = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    // const notifications = await Notification.find({ postUser: userId });
+    const notifications = await Notification.find({
+      postUser: userId,
+    }).populate("user", "name username avatar");
+
+    markAsSeen(notifications);
+
+    res.status(200).json({
+      status: "success",
+      message: "Notification fetched successfully",
+      data: notifications,
     });
   } catch (err) {
     console.log(err.message);

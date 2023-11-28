@@ -42,6 +42,7 @@ const sendOTP = async (id, res) => {
   try {
     const user = await User.findById(id);
     const otp = generateOTP();
+    console.log(otp);
     const otpHash = await hashData(otp);
     user.otp = otpHash;
     user.otpExpiryTime = otpExpiryTime();
@@ -95,7 +96,8 @@ exports.verify = async (req, res) => {
           userId: user.id,
           following:user.following,
           username:user.username,
-          avatar:user.avatar
+          avatar:user.avatar,
+          name:user.name
         });
       }
     }
@@ -134,7 +136,8 @@ exports.signin = async (req, res) => {
         userId: user.id,
         following:user.following,
         username:user.username,
-        avatar:user.avatar
+        avatar:user.avatar,
+        name:user.name
       });
   } catch (err) {
     console.log(err.message);

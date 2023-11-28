@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { createPost, fetchMyUserPosts, fetchPosts, likePost, removeLike, postComment, savePost, removeSavedPost, followUser, unFollowUser, fetchPost, fetchExplore, fetchUserPosts, commentLike, removeCommentLike, createVideoPost, fetchReels, fetchSeachResults } = require("../controllers/app");
+const { createPost, fetchMyUserPosts, fetchPosts, likePost, removeLike, postComment, savePost, removeSavedPost, followUser, unFollowUser, fetchPost, fetchExplore, fetchUserPosts, commentLike, removeCommentLike, createVideoPost, fetchReels, fetchSeachResults, fetchNotificationsCount, fetchNotifications } = require("../controllers/app");
 
 const stoarge = multer.memoryStorage();
 const upload = multer({storage:stoarge});
@@ -26,5 +26,7 @@ router
    .get("/fetch-explore", fetchExplore)
    .patch("/comment-like", commentLike)
    .patch("/remove-comment-like", removeCommentLike)
+   .get("/fetch-notifications-count", fetchNotificationsCount)
+   .get("/fetch-notifications", fetchNotifications)
 
 module.exports = router;
