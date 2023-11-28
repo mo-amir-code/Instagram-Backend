@@ -15,7 +15,7 @@ const io = new Server(server, {
   },
 });
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT || 8000, () => {
   console.log(`server started at PORT ${process.env.PORT}.....`);
 });
 
