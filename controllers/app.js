@@ -470,6 +470,7 @@ exports.fetchPost = async (req, res) => {
 exports.fetchExplore = async (req, res) => {
   try {
     const { results, totalResult } = req.query;
+    console.log(req.query);
     let tr = totalResult;
     const postCount = await Post.countDocuments();
     const reelCount = await Reel.countDocuments();

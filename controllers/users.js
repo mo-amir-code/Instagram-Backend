@@ -57,6 +57,13 @@ exports.fetchUser = async (req, res) => {
     const user = await User.findOne({ username: username }).select(
       "id name username email avatar followers following bio category"
     );
+
+    if(!user){
+      res
+      .status(400)
+      .json({ status: "User not found!", message: "User not found!" });
+    }
+
     const posts = await Post.countDocuments({ user: user.id });
     const data = structuredData(user, posts);
 

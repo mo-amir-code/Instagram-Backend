@@ -227,6 +227,27 @@ io.on("connection", async (socket) => {
     io.to(user.socketId).emit("new-notification", { type });
   });
 
+  socket.on(
+    "conversation-update-count",
+    async ({ loggedInUserId }, callback) => {
+      try {
+        const convs = await DuoChat.find({ users: loggedInUserId });
+        let count = 0;
+        convs.forEach((conv) => {
+          conv.conversation.forEach((msg) => {
+            if (msg.read === false) {
+              count += 1;
+              return;
+            }
+          });
+        });
+        callback({ count });
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+  );
+
   // socket.on("disconnect", async (userId) => {
   //   await User.findByIdAndUpdate(userId, { status: "offline" });
   // });
