@@ -5,17 +5,17 @@ const router = require("./routers");
 
 const app = express();
 // Use the cors middleware to enable CORS
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "PUT", "POST", "DELETE"],
-    allowedHeaders: ["Content-Type"],
-    credentials: true,
-    optionSuccessStatus: 200,
-  })
-);
+app.use(cors());
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://instagram-frontend-moamir.netlify.app");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Credentials", true);
+  next();
+});
 
 app.use(router);
 
