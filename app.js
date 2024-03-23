@@ -7,7 +7,7 @@ const app = express();
 // Use the cors middleware to enable CORS
 app.use(
   cors({
-    origin: process.env.SOCKET_ORIGIN,
+    origin: "*",
     methods: ["GET", "PUT", "POST", "DELETE"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
