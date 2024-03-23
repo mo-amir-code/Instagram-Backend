@@ -13,7 +13,6 @@ const io = new Server(server, {
     origin: process.env.SOCKET_ORIGIN,
     methods: ["GET", "POST"],
     credentials:true,
-    allowedHeaders:[`Access-Control-Allow-Origin:${process.env.SOCKET_ORIGIN}`]
   },
 })
 
