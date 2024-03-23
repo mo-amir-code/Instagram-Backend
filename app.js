@@ -4,19 +4,18 @@ const { connectToDB } = require("./services/Database");
 const router = require("./routers");
 
 const app = express();
-// Use the cors middleware to enable CORS
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://instagram-fullstack-amir.vercel.app"
-  ],
-  methods: ["GET", "PUT", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type"],
-  credentials: true
-}));
+
+app.use(cors());
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
 
+router.get("/", (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*")
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Max-Age", "1800");
+    res.setHeader("Access-Control-Allow-Headers", "content-type");
+    res.setHeader( "Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, PATCH, OPTIONS" ); 
+ });
 
 app.use(router);
 
