@@ -12,8 +12,9 @@ const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173/", process.env.SOCKET_ORIGIN],
     methods: ["GET", "POST"],
+    credentials:true,
+    allowedHeaders:[`Access-Control-Allow-Origin:${process.env.SOCKET_ORIGIN}`]
   },
-});
 
 server.listen(process.env.PORT, () => {
   console.log(`server started at PORT ${process.env.PORT}.....`);
