@@ -10,7 +10,7 @@ const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.SOCKET_ORIGIN,
+    origin: ["http://localhost:5173/", process.env.SOCKET_ORIGIN],
     methods: ["GET", "POST"],
   },
 });
