@@ -9,6 +9,7 @@ const { checkIncoming } = require("./services/appServices");
 const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
 const io = new Server(server, {
+  path: "/socket",
   wssEngine:["ws", "wss"],
   transports:["websocket", "polling"],
   cors: {
