@@ -11,8 +11,11 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"],
-    methods: ["GET", "POST"],
   },
+});
+
+server.prependListener("request", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
 });
 
 server.listen(process.env.PORT, () => {
