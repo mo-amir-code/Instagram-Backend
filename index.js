@@ -9,9 +9,12 @@ const { checkIncoming } = require("./services/appServices");
 const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
 const io = new Server(server, {
+  wssEngine:["ws", "wss"],
+  transports:["websocket", "polling"],
   cors: {
-    origin: ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"],
-  }
+    origin: "*",
+  },
+  allowEI03: true
 });
 
 server.listen(process.env.PORT, () => {
