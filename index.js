@@ -2,7 +2,7 @@ const app = require("./app");
 require("dotenv/config");
 const { Server } = require("socket.io");
 
-const http = require("https");
+const http = require("http");
 const User = require("./models/User");
 const DuoChat = require("./models/DuoChat");
 const { checkIncoming } = require("./services/appServices");
