@@ -11,8 +11,10 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"],
-  },
+  }
 });
+
+io.attach(server);
 
 server.listen(process.env.PORT, () => {
   console.log(`server started at PORT ${process.env.PORT}.....`);

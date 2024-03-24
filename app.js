@@ -4,7 +4,7 @@ const { connectToDB } = require("./services/Database");
 const router = require("./routers");
 const cors = require("cors");
 
-const whitelist = ["https://instagram-fullstack-amir.vercel.app"];
+const whitelist = ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"];
 
 const corsOptions = {
   credentials: true, // This is important.
