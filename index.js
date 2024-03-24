@@ -10,8 +10,9 @@ const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://instagram-fullstack-amir.vercel.app", "http://localhost:3000"],
-    methods: ["GET", "POST"]
+    origin: ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"],
+    methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
