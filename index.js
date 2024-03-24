@@ -8,13 +8,14 @@ const DuoChat = require("./models/DuoChat");
 const { checkIncoming } = require("./services/appServices");
 const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials:true,
-  },
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: "*",
+//     methods: ["GET", "POST"],
+//     credentials:true,
+//   },
+// });
+const io = new Server(server);
 
 server.listen(process.env.PORT, () => {
   console.log(`server started at PORT ${process.env.PORT}.....`);
