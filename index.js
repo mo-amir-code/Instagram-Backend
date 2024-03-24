@@ -14,8 +14,6 @@ const io = new Server(server, {
   }
 });
 
-io.attach(server);
-
 server.listen(process.env.PORT, () => {
   console.log(`server started at PORT ${process.env.PORT}.....`);
 });
