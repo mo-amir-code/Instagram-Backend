@@ -1,5 +1,5 @@
 const app = require("./app");
-require("dotenv").config();
+require("dotenv/config");
 const { Server } = require("socket.io");
 
 const http = require("http");
@@ -10,11 +10,11 @@ const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://instagram-fullstack-amir.vercel.app",
+    origin: process.env.SOCKET_ORIGIN,
     methods: ["GET", "POST"],
     credentials:true,
   },
-})
+});
 
 server.listen(process.env.PORT, () => {
   console.log(`server started at PORT ${process.env.PORT}.....`);
