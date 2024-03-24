@@ -2,7 +2,7 @@ const app = require("./app");
 require("dotenv/config");
 const { Server } = require("socket.io");
 
-const http = require("http");
+const http = require("https");
 const User = require("./models/User");
 const DuoChat = require("./models/DuoChat");
 const { checkIncoming } = require("./services/appServices");
@@ -12,7 +12,6 @@ const io = new Server(server, {
   cors: {
     origin: ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST"],
-    credentials:true,
   },
 });
 
