@@ -1,5 +1,5 @@
 const app = require("./app");
-require("dotenv/config");
+require("dotenv").config();
 const { Server } = require("socket.io");
 
 const http = require("http");
@@ -9,13 +9,10 @@ const { checkIncoming } = require("./services/appServices");
 const { uploadOnCloudinaryForChat } = require("./services/UploadCloudinary");
 const server = http.createServer(app);
 const io = new Server(server, {
-  path: "/socket",
-  wssEngine:["ws", "wss"],
-  transports:["websocket", "polling"],
   cors: {
-    origin: "*",
+    origin: process.env.SOCKET_ORIGIN,
+    methods: ["GET", "POST"],
   },
-  allowEI03: true
 });
 
 server.listen(process.env.PORT, () => {
@@ -23,6 +20,7 @@ server.listen(process.env.PORT, () => {
 });
 
 // socket.io
+
 io.on("connection", async (socket) => {
   const { userId } = socket.handshake.query;
   const socketId = socket.id;
