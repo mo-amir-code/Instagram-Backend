@@ -1,34 +1,23 @@
-require("dotenv/config");
 const express = require("express");
+const cors = require("cors");
 const { connectToDB } = require("./services/Database");
 const router = require("./routers");
-const cors = require("cors");
-
-const whitelist = ["https://instagram-fullstack-amir.vercel.app", "http://localhost:5173"];
-
-const corsOptions = {
-  credentials: true, // This is important.
-  origin: (origin, callback) => {
-    if(whitelist.includes(origin))
-      return callback(null, true)
-
-      callback(new Error('Not allowed by CORS'));
-  }
-}
 
 const app = express();
-
-app.use(cors(corsOptions))
+app.use(cors());
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
-
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-//   res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token');
-//   res.setHeader('Access-Control-Allow-Credentials', "true");
-//   next();
-// });
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://instagram-frontend-moamir.netlify.app"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Credentials", true);
+  next();
+});
 
 app.use(router);
 
